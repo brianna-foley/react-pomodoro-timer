@@ -16,43 +16,12 @@ function Timer() {
   const isPausedRef = useRef(isPaused);
   const modeRef = useRef(mode);
 
+  const audioBeep = document.getElementById('beep');
+
   const tick = () => {
     secondsLeftRef.current = secondsLeftRef.current - 1;
     setSecondsLeft(secondsLeftRef.current);
   }
-
-  useEffect(() => {
-
-    const switchMode = () => {
-      const nextMode = modeRef.current === 'work' ? 'break' : 'work';
-      const nextSeconds = (nextMode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60;
-
-      setMode(nextMode);
-      modeRef.current = nextMode;
-
-      setSecondsLeft(nextSeconds);
-      secondsLeftRef.current = nextSeconds;
-    }
-
-    secondsLeftRef.current = (modeRef.current === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60;
-    setSecondsLeft(secondsLeftRef.current);
-
-
-    const sound = document.getElementById('beep');
-
-    const interval = setInterval(() => {
-      if (isPausedRef.current) return;
-      if (secondsLeftRef.current === 0) {
-        sound.play();
-        switchMode();
-      }
-
-      tick();
-    }, 100)
-
-    return () => clearInterval(interval);
-  }, [settingsInfo]);
-
 
   const switchModeToWork = () => {
     const nextMode = modeRef.current === 'work' ? 'break' : 'work';
@@ -85,7 +54,41 @@ function Timer() {
     isPausedRef.current = true;
   }
 
-  const audioBeep = document.getElementById('beep');
+  useEffect(() => {
+
+    const switchMode = () => {
+      const nextMode = modeRef.current === 'work' ? 'break' : 'work';
+      const nextSeconds = (nextMode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60;
+
+      setMode(nextMode);
+      modeRef.current = nextMode;
+
+      setSecondsLeft(nextSeconds);
+      secondsLeftRef.current = nextSeconds;
+    }
+
+    secondsLeftRef.current = (modeRef.current === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60;
+    setSecondsLeft(secondsLeftRef.current);
+
+
+    const sound = document.getElementById('beep');
+
+    const interval = setInterval(() => {
+      if (isPausedRef.current) return;
+      if (secondsLeftRef.current === 0) {
+        sound.play();
+        switchMode();
+        setTimeout(() => {
+          tick();
+        }, 1000);
+      } else {
+        tick();
+      }
+
+    }, 1000)
+
+    return () => clearInterval(interval);
+  }, [settingsInfo]);
 
   const reset = () => {
     setDefaultTimes();
